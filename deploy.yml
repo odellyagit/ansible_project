@@ -1,0 +1,38 @@
+---
+- name: "Installation d'un conteneur apache"
+  hosts: master
+  become: true
+
+  pre_tasks:
+    - name: install EPEL repo
+      package: 
+        name: epel-release
+        state: present
+      when: 
+        ansible_distribution: "CENTOS"
+          # - name: install python pip
+      #yum:
+        #name: python-pip
+          #state: present
+          #     update_cache: true
+
+    - name: download pip script
+      get_url:
+        url: https://bootstrap.pypa.io/pip/3.6/get-pip.py
+        dest: /tmp/get-pip.py
+
+    - name: install python-pip
+      command: python3 /tmp/get-pip.py   
+
+    - name: Install docker python
+      yum:
+        name: python-docker-py
+        update_cache: true
+
+  tasks:
+    - name: Create apache a container
+      docker_container:
+        name: webapp
+        image: httpd
+        ports:
+          - "80:80"
