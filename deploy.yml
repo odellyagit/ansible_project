@@ -1,28 +1,36 @@
 ---
 - name: "Installation d'un conteneur apache"
-  hosts: master
+  hosts: all
   become: true
 
   pre_tasks:
     - name: install EPEL repo
-      package: 
-        name: epel-release
+      package:  name= '{{item}}' state=present
+      when: ansible_distribution == "CENTOS"
+      loop: 
+        - epel-release
+        - wget
+    
+    - name: install python pip
+      yum:
+        name: python-pip
         state: present
-      when: 
-        ansible_distribution: "CENTOS"
-          # - name: install python pip
-      #yum:
-        #name: python-pip
-          #state: present
-          #     update_cache: true
+        update_cache: true
 
     - name: download pip script
       get_url:
         url: https://bootstrap.pypa.io/pip/3.6/get-pip.py
         dest: /tmp/get-pip.py
-
-    - name: install python-pip
-      command: python3 /tmp/get-pip.py   
+    
+    - name: install python3
+      raw: 'cat < /usr/local/bin/script.sh'
+      args:
+        executable: /bin/bash
+     
+    - name: Copy website file template
+      template:
+        src: index.html.j2
+        dest: /home/vagrant/index.html
 
     - name: Install docker python
       yum:
@@ -36,3 +44,6 @@
         image: httpd
         ports:
           - "80:80"
+        volumes: 
+          - /home/vagrant/index.html:/usr/local/apache2/htdocs/index.html
+        
