@@ -2,6 +2,8 @@
 - name: "Installation d'un conteneur apache"
   hosts: all
   become: true
+  vars_files: 
+    - files/secrets/credentials.yml
 
   pre_tasks:
     - name: install EPEL repo
